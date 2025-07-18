@@ -1,0 +1,36 @@
+/* MantenimientosPage Styles */
+.mantenimientos-page {
+  padding: 2rem;
+}
+
+.mantenimientos-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.status-badge.excelente {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.status-badge.muy-buena {
+  background-color: #28a745;
+  color: white;
+}
+
+.status-badge.regular {
+  background-color: var(--warning-color);
+  color: white;
+}
+
+.status-badge.mala {
+  background-color: #fd7e14;
+  color: white;
+}
+
+.status-badge.muy-mala {
+  background-color: var(--danger-color);
+  color: white;
+}

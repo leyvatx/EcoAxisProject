@@ -1,0 +1,26 @@
+/* PagosPage Styles */
+.pagos-page {
+  padding: 2rem;
+}
+
+.pagos-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.status-badge.exitoso {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.status-badge.pendiente {
+  background-color: var(--warning-color);
+  color: white;
+}
+
+.status-badge.fallido {
+  background-color: var(--danger-color);
+  color: white;
+}

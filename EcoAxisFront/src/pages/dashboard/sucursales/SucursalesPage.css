@@ -1,0 +1,53 @@
+/* Estilos para SucursalesPage.jsx */
+.sucursales-page {
+  padding: 2rem;
+}
+
+.sucursales-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.sucursal-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.sucursal-name {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.sucursal-id {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.address-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.875rem;
+}
+
+.address-info div:first-child {
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+.address-info div:last-child {
+  color: var(--text-muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sucursales-page {
+    padding: 1rem;
+  }
+  
+  .sucursales-stats {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

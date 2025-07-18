@@ -1,0 +1,21 @@
+/* SubscripcionesPage Styles */
+.subscripciones-page {
+  padding: 2rem;
+}
+
+.subscripciones-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.status-badge.activa {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.status-badge.inactiva {
+  background-color: var(--danger-color);
+  color: white;
+}

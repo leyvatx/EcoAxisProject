@@ -1,0 +1,254 @@
+{
+  "usuarios": [
+    {
+      "id": "1",
+      "uuid": "efb2ce14-d883-461a-a9ea-c51ae55704ef",
+      "nombres": "Efrain Alejandro",
+      "apellidos": "Ruelas Islas",
+      "email": "Efari@gmail.com",
+      "password": "contraseñasuprema"
+    }
+  ],
+  "empresa": [
+    {
+      "id": "1",
+      "uuid": "6ca6bd48-0d6b-4a08-ad0b-a1612f64c095",
+      "nombre": "Energía Verde MX S.A. de C.V.",
+      "colonia": "Zona Río",
+      "calle": "Paseo de los Héroes",
+      "cp": 22010,
+      "num_ext": 1055,
+      "num_int": "2B",
+      "rfc": "EVM240106TL2",
+      "estado": "Tijuana",
+      "telefono": "6641234567",
+      "giro": "Fabricación de electrodomésticos",
+      "tamano": "Pequeña",
+      "userId": 1
+    }
+  ],
+  "subscripciones": [
+    {
+      "id": "1",
+      "uuid": "87557851-b1de-44e4-bdc4-a4578fab2d68",
+      "empresaId": 1,
+      "fecha_pago": "2025-07-01",
+      "siguiente_pago": "2025-08-01",
+      "status": true
+    }
+  ],
+  "sucursal": [
+    {
+      "id": "1",
+      "uuid": "7cbb3390-d8ae-4ec3-bab1-e1fa31c178e5",
+      "nombre": "Sucursal Centro",
+      "colonia": "Zona Centro",
+      "calle": "Calle Segunda",
+      "cp": 22000,
+      "num_ext": "102",
+      "empresaId": 1
+    },
+    {
+      "id": "2",
+      "uuid": "5d9c8f1b-bd71-4f0f-84cf-e1f4180d38b1",
+      "nombre": "Sucursal Río",
+      "colonia": "Zona Río",
+      "calle": "Paseo de los Héroes",
+      "cp": 22010,
+      "num_ext": "456",
+      "empresaId": 1
+    },
+    {
+      "id": "3",
+      "uuid": "3b3486de-648c-4bc7-9a79-b1e17c973416",
+      "nombre": "Sucursal Otay",
+      "colonia": "Mesa Otay",
+      "calle": "Boulevard Industrial",
+      "cp": 22430,
+      "num_ext": "789",
+      "empresaId": 1
+    },
+    {
+      "id": "4",
+      "uuid": "22e6c12f-0fbd-4be4-bf19-7a7c215b487c",
+      "nombre": "Sucursal Playas",
+      "colonia": "Playas de Tijuana",
+      "calle": "Paseo Ensenada",
+      "cp": 22504,
+      "num_ext": "202",
+      "empresaId": 1
+    },
+    {
+      "id": "5",
+      "uuid": "e6f9cdb0-fd0b-4a30-9147-e20298d8bfc9",
+      "nombre": "Sucursal La Mesa",
+      "colonia": "La Mesa",
+      "calle": "Boulevard Díaz Ordaz",
+      "cp": 22105,
+      "num_ext": "330",
+      "empresaId": 1
+    }
+  ],
+  "catalogo": [
+    {
+      "id": "1",
+      "uuid": "beacfc5a-08a2-4a11-bec4-b8215f3b915f",
+      "nombre": "Aire Acondicionado Split",
+      "marca": "LG",
+      "modelo": "LSQ123",
+      "consumo_kw": 1.23567
+    },
+    {
+      "id": "2",
+      "uuid": "c651ba4e-89b4-48db-a8c5-0501e9a958ae",
+      "nombre": "Refrigerador Industrial",
+      "marca": "Samsung",
+      "modelo": "RF305",
+      "consumo_kw": 0.95432
+    },
+    {
+      "id": "3",
+      "uuid": "7cd8283c-e94c-4f0c-a86f-76666dc8dce2",
+      "nombre": "Calentador de Agua",
+      "marca": "Bosch",
+      "modelo": "THX500",
+      "consumo_kw": 0.87543
+    }
+  ],
+  "productos_empresas": [
+    {
+      "id": "1",
+      "uuid": "4b6a8bb6-ffd5-4079-8d42-5f4ebb1ab250",
+      "productoId": 1,
+      "sucursalId": 1,
+      "alias": "Aire Recepción",
+      "horas_uso_diario": 8,
+      "dias_uso_mensual": 22,
+      "ubicacion": "Recepción"
+    },
+    {
+      "id": "2",
+      "uuid": "9b0f1758-2975-4fe6-a20b-d4d6f91ef135",
+      "productoId": 2,
+      "sucursalId": 2,
+      "alias": "Refrigerador Cocina",
+      "horas_uso_diario": 24,
+      "dias_uso_mensual": 30,
+      "ubicacion": "Cocina industrial"
+    },
+    {
+      "id": "3",
+      "uuid": "9552d23b-af9a-45f8-8188-99b9de056f06",
+      "productoId": 3,
+      "sucursalId": 3,
+      "alias": "Calentador Oficina",
+      "horas_uso_diario": 3.5,
+      "dias_uso_mensual": 15,
+      "ubicacion": "Baño principal"
+    }
+  ],
+  "tecnicos": [
+    {
+      "id": "1",
+      "uuid": "fa6b5e25-9185-47f5-bd5d-1f44a30a91a4",
+      "nombre": "Carlos",
+      "apellido": "Ruelas",
+      "correo": "carlos.ruelas@ecoaxis.com",
+      "numero": "6641112233",
+      "sucursalId": 1,
+      "empresaId": 1
+    },
+    {
+      "id": "2",
+      "uuid": "b6f45ce2-9470-4e5d-a2d1-c770b58baf5c",
+      "nombre": "Efrain",
+      "apellido": "Leyva",
+      "correo": "efrain.leyva@ecoaxis.com",
+      "numero": "6642223344",
+      "sucursalId": 2,
+      "empresaId": 1
+    },
+    {
+      "id": "3",
+      "uuid": "3124e242-927c-4d71-a678-267b5e7d1468",
+      "nombre": "Jorge",
+      "apellido": "Ramírez",
+      "correo": "jorge.ramirez@ecoaxis.com",
+      "numero": "6643334455",
+      "sucursalId": 3,
+      "empresaId": 1
+    }
+  ],
+  "tipo_reportes": [
+    {
+      "id": "1",
+      "uuid": "14fa17a3-ba01-4592-a5f0-6b80ae6d19ae",
+      "tipo": "Alertas de eficiencia",
+      "descripcion": "Alertas por productos con alto consumo"
+    },
+    {
+      "id": "2",
+      "uuid": "a7c2d1fd-9755-468c-81a1-4fde9d5fc269",
+      "tipo": "Mantenimientos programados",
+      "descripcion": "Calendario y estado de mantenimiento"
+    }
+  ],
+  "reportes": [
+    {
+      "id": "1",
+      "uuid": "471b024f-ce11-46a1-ac7a-4f696cfedec3",
+      "tipoReporteId": 1,
+      "empresaId": 1,
+      "sucursalId": 1,
+      "fecha": "2025-07-01T10:00:00"
+    },
+    {
+      "id": "2",
+      "uuid": "a682fe29-1ade-45be-bec4-16afb48703a7",
+      "tipoReporteId": 2,
+      "empresaId": 1,
+      "sucursalId": 2,
+      "fecha": "2025-07-03T15:00:00"
+    },
+    {
+      "id": "3",
+      "uuid": "5e1fa9b5-89e9-4161-808a-8136b746fb4f",
+      "tipoReporteId": 1,
+      "empresaId": 1,
+      "sucursalId": 3,
+      "fecha": "2025-07-05T08:30:00"
+    }
+  ],
+  "mantenimientos": [
+    {
+      "id": "1",
+      "uuid": "d871ea54-b7a9-44c3-b804-5f2cb5091077",
+      "productoEmpresaId": 1,
+      "tecnicoId": 1,
+      "fecha": "2025-06-15",
+      "tipo": "Preventivo",
+      "estado_equipo": "Muy buena",
+      "proximo": "2025-12-15"
+    },
+    {
+      "id": "2",
+      "uuid": "1a230c1e-c5d4-45f1-9ed4-144826f5e7f1",
+      "productoEmpresaId": 2,
+      "tecnicoId": 2,
+      "fecha": "2025-06-18",
+      "tipo": "Correctivo",
+      "estado_equipo": "Regular",
+      "proximo": "2025-09-18"
+    },
+    {
+      "id": "3",
+      "uuid": "06ae2388-27e3-4c96-bd27-6e865b749d68",
+      "productoEmpresaId": 1,
+      "tecnicoId": 3,
+      "fecha": "2025-06-22",
+      "tipo": "Correctivo urgente",
+      "estado_equipo": "Mala",
+      "proximo": "2025-07-22"
+    }
+  ]
+}
