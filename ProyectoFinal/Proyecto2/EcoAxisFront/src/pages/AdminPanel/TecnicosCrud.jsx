@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useError } from '../../contexts/ErrorContext';
+import { handleApiResponse, validateForm } from '../../utils/errorHandling';
 import './TecnicosCrud.css';
 
 const TecnicosCrud = () => {
@@ -15,24 +17,38 @@ const TecnicosCrud = () => {
         tipo_tecnico: ''
     });
     const [editId, setEditId] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const { showError } = useError();
     const API_URL = 'http://localhost:3000/tecnico';
 
     const getTecnicos = async () => {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-        setTecnicos(data);
+        try {
+            const res = await fetch(API_URL);
+            const data = await handleApiResponse(res);
+            setTecnicos(data);
+        } catch (error) {
+            showError('No se pudieron cargar los técnicos');
+        }
     };
 
     const getSucursales = async () => {
-        const res = await fetch('http://localhost:3000/sucursal');
-        const data = await res.json();
-        setSucursales(data);
+        try {
+            const res = await fetch('http://localhost:3000/sucursal');
+            const data = await handleApiResponse(res);
+            setSucursales(data);
+        } catch (error) {
+            showError(`Error al cargar sucursales: ${error.message}`);
+        }
     };
 
     const getTiposTecnico = async () => {
-        const res = await fetch('http://localhost:3000/tipo-tecnico');
-        const data = await res.json();
-        setTiposTecnico(data);
+        try {
+            const res = await fetch('http://localhost:3000/tipo-tecnico');
+            const data = await handleApiResponse(res);
+            setTiposTecnico(data);
+        } catch (error) {
+            showError(`Error al cargar tipos de técnico: ${error.message}`);
+        }
     };
 
     useEffect(() => {
@@ -46,26 +62,41 @@ const TecnicosCrud = () => {
     };
 
     const handleSubmit = async () => {
-        const method = editId ? 'PUT' : 'POST';
-        const url = editId ? `${API_URL}/${editId}` : API_URL;
+        if (loading) return;
+        
+        try {
+            setLoading(true);
+            
+            // Validar campos requeridos
+            validateForm(form, ['nombre_tecnico', 'apellido_tecnico', 'correo_tecnico', 'telefono_tecnico', 'sucursal', 'tipo_tecnico']);
+            
+            const method = editId ? 'PUT' : 'POST';
+            const url = editId ? `${API_URL}/${editId}` : API_URL;
 
-        await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(form)
-        });
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(form)
+            });
 
-        setForm({
-            nombre_tecnico: '',
-            apellido_tecnico: '',
-            correo_tecnico: '',
-            telefono_tecnico: '',
-            sucursal: '',
-            empresaId: 1,
-            tipo_tecnico: ''
-        });
-        setEditId(null);
-        getTecnicos();
+            await handleApiResponse(res);
+
+            setForm({
+                nombre_tecnico: '',
+                apellido_tecnico: '',
+                correo_tecnico: '',
+                telefono_tecnico: '',
+                sucursal: '',
+                empresaId: 1,
+                tipo_tecnico: ''
+            });
+            setEditId(null);
+            await getTecnicos();
+        } catch (error) {
+            showError(error.message || (editId ? 'No se pudo actualizar el técnico' : 'No se pudo crear el técnico'));
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleEdit = (tecnico) => {
@@ -74,8 +105,18 @@ const TecnicosCrud = () => {
     };
 
     const handleDelete = async (id) => {
-        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-        getTecnicos();
+        if (loading) return;
+        
+        try {
+            setLoading(true);
+            const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            await handleApiResponse(res);
+            await getTecnicos();
+        } catch (error) {
+            showError('No se pudo eliminar el técnico');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -129,8 +170,8 @@ const TecnicosCrud = () => {
                     ))}
                 </select>
 
-                <button type="button" className="submit-btn" onClick={handleSubmit}>
-                    {editId ? 'Actualizar' : 'Agregar'}
+                <button type="button" className="submit-btn" onClick={handleSubmit} disabled={loading}>
+                    {loading ? 'Procesando...' : (editId ? 'Actualizar' : 'Agregar')}
                 </button>
             </form>
 
@@ -147,8 +188,10 @@ const TecnicosCrud = () => {
                             <p>👨‍🔧 Tipo: {t.tipo_tecnico.nombre}</p>
                         </div>
                         <div className="btn-group">
-                            <button className="edit-btn" onClick={() => handleEdit(t)}>Editar</button>
-                            <button className="delete-btn" onClick={() => handleDelete(t.id)}>Eliminar</button>
+                            <button className="edit-btn" onClick={() => handleEdit(t)} disabled={loading}>Editar</button>
+                            <button className="delete-btn" onClick={() => handleDelete(t.id)} disabled={loading}>
+                                {loading ? '...' : 'Eliminar'}
+                            </button>
                         </div>
                     </li>
                 ))}

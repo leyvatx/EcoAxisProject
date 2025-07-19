@@ -27,8 +27,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 class TipoTecnico(models.Model):
     tipo_tecnico_uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     rol_tecnico = models.CharField(max_length=50, choices=[
-        ('Tecnico Superior', 'Tecnico Superior'),
-        ('Tecnico Mantenimiento', 'Tecnico Mantenimiento')])
+        ('Tecnico Superior', 'Tecnico Superior')])
 
     def __str__(self):
         return self.rol_tecnico

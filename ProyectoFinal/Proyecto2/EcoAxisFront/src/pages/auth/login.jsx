@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useError } from '../../contexts/ErrorContext';
 import './login.css';
 
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { showError } = useError();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
@@ -19,26 +20,29 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
-    if (error) setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isLoading) return;
+    
     setIsLoading(true);
-    setError('');
 
     try {
+      if (!formData.email || !formData.password) {
+        throw new Error('Por favor completa todos los campos');
+      }
+
       const result = await login(formData.email, formData.password);
       
       if (result.success) {
         navigate('/dashboard');
       } else {
-        setError(result.error || 'Error al iniciar sesión. Intenta nuevamente.');
+        throw new Error(result.error || 'Credenciales incorrectas');
       }
       
     } catch (error) {
-      console.error('Error de login:', error);
-      setError('Error inesperado al iniciar sesión. Intenta nuevamente.');
+      showError(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +75,7 @@ const Login = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`form-input ${error ? 'error' : ''}`}
+                  className="form-input"
                   placeholder="tu@email.com"
                   required
                   disabled={isLoading}
@@ -90,7 +94,7 @@ const Login = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className={`form-input ${error ? 'error' : ''}`}
+                  className="form-input"
                   placeholder="Tu contraseña"
                   required
                   disabled={isLoading}
@@ -105,12 +109,6 @@ const Login = () => {
                 </button>
               </div>
             </div>
-
-            {error && (
-              <div className="form-error">
-                {error}
-              </div>
-            )}
 
             <button
               type="submit"

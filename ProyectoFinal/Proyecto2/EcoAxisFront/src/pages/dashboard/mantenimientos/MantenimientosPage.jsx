@@ -137,8 +137,6 @@ const MantenimientosPage = () => {
       <div className="mantenimientos-page">
         <div className="page-header">
           <div className="header-content">
-            <h1>Gestión de Mantenimientos</h1>
-            <p>Administra los mantenimientos de equipos</p>
           </div>
           <button 
             className="btn-primary"

@@ -16,6 +16,21 @@ class UsuarioSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+    def update(self, instance, validated_data):
+        # Extraer la contraseña si está presente
+        password = validated_data.pop('password', None)
+        
+        # Actualizar los otros campos
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        # Solo actualizar la contraseña si se proporcionó una nueva
+        if password:
+            instance.set_password(password)
+        
+        instance.save()
+        return instance
+
 class UsuarioPerfilSerializer(serializers.ModelSerializer):
     """Serializer para devolver datos del usuario sin password"""
     class Meta:

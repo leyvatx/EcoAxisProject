@@ -20,6 +20,10 @@ const Sidebar = () => {
     return fullName || 'Usuario';
   };
 
+  const handleLogout = () => {
+    logout();
+  };
+
   // Función para determinar el rol del usuario
   const getUserRole = () => {
     if (!user) return 'Usuario';
@@ -33,8 +37,12 @@ const Sidebar = () => {
     return 'Empresa';
   };
 
-  const handleLogout = () => {
-    logout();
+  // Función para determinar si un item está activo
+  const isActiveItem = (itemPath) => {
+    if (itemPath === '/dashboard') {
+      return location.pathname === '/dashboard';
+    }
+    return location.pathname === itemPath;
   };
 
   const menuSections = [
@@ -89,7 +97,7 @@ const Sidebar = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`sidebar-item ${location.pathname === item.path ? 'active' : ''}`}
+                className={`sidebar-item ${isActiveItem(item.path) ? 'active' : ''}`}
               >
                 <span className="sidebar-icon">{item.icon}</span>
                 <span className="sidebar-label">{item.label}</span>

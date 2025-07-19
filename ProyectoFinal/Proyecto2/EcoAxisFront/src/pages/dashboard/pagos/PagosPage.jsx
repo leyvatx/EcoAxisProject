@@ -127,8 +127,6 @@ const PagosPage = () => {
           <div className="pagos-page">
             <div className="page-header">
               <div className="header-content">
-                <h1>Gestión de Pagos</h1>
-                <p>Administra los pagos de suscripciones</p>
               </div>
               <button 
                 className="btn-primary"

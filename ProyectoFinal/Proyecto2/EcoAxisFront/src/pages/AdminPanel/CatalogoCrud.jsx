@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useError } from '../../contexts/ErrorContext';
+import { handleApiResponse, validateForm } from '../../utils/errorHandling';
 import './CatalogoCrud.css';
 
 const CatalogoCrud = () => {
@@ -10,12 +12,18 @@ const CatalogoCrud = () => {
         consumo_kw: ''
     });
     const [editId, setEditId] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const { showError } = useError();
     const API_URL = 'http://localhost:3000/catalogo';
 
     const getProductos = async () => {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-        setProductos(data);
+        try {
+            const res = await fetch(API_URL);
+            const data = await handleApiResponse(res);
+            setProductos(data);
+        } catch (error) {
+            showError('No se pudieron cargar los productos');
+        }
     };
 
     useEffect(() => {
@@ -27,23 +35,38 @@ const CatalogoCrud = () => {
     };
 
     const handleSubmit = async () => {
-        const method = editId ? 'PUT' : 'POST';
-        const url = editId ? `${API_URL}/${editId}` : API_URL;
+        if (loading) return;
+        
+        try {
+            setLoading(true);
+            
+            // Validar campos requeridos
+            validateForm(form, ['nombre_producto', 'marca_producto', 'modelo_producto', 'consumo_kw']);
+            
+            const method = editId ? 'PUT' : 'POST';
+            const url = editId ? `${API_URL}/${editId}` : API_URL;
 
-        await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(form)
-        });
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(form)
+            });
 
-        setForm({
-            nombre_producto: '',
-            marca_producto: '',
-            modelo_producto: '',
-            consumo_kw: ''
-        });
-        setEditId(null);
-        getProductos();
+            await handleApiResponse(res);
+
+            setForm({
+                nombre_producto: '',
+                marca_producto: '',
+                modelo_producto: '',
+                consumo_kw: ''
+            });
+            setEditId(null);
+            await getProductos();
+        } catch (error) {
+            showError(error.message || (editId ? 'No se pudo actualizar el producto' : 'No se pudo crear el producto'));
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleEdit = (producto) => {
@@ -52,8 +75,18 @@ const CatalogoCrud = () => {
     };
 
     const handleDelete = async (id) => {
-        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-        getProductos();
+        if (loading) return;
+        
+        try {
+            setLoading(true);
+            const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            await handleApiResponse(res);
+            await getProductos();
+        } catch (error) {
+            showError('No se pudo eliminar el producto');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -88,8 +121,8 @@ const CatalogoCrud = () => {
                     onChange={handleChange} 
                 />
 
-                <button type="button" className="submit-btn" onClick={handleSubmit}>
-                    {editId ? 'Actualizar' : 'Agregar'}
+                <button type="button" className="submit-btn" onClick={handleSubmit} disabled={loading}>
+                    {loading ? 'Procesando...' : (editId ? 'Actualizar' : 'Agregar')}
                 </button>
             </form>
 
@@ -105,8 +138,10 @@ const CatalogoCrud = () => {
                             <p>⚡ Consumo: {p.consumo_kw} KW</p>
                         </div>
                         <div className="btn-group">
-                            <button className="edit-btn" onClick={() => handleEdit(p)}>Editar</button>
-                            <button className="delete-btn" onClick={() => handleDelete(p.id)}>Eliminar</button>
+                            <button className="edit-btn" onClick={() => handleEdit(p)} disabled={loading}>Editar</button>
+                            <button className="delete-btn" onClick={() => handleDelete(p.id)} disabled={loading}>
+                                {loading ? '...' : 'Eliminar'}
+                            </button>
                         </div>
                     </li>
                 ))}

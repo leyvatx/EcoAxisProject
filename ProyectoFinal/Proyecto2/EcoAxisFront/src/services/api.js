@@ -81,7 +81,7 @@ export const usuariosAPI = {
 
   update: async (id, userData) => {
     return apiRequest(`/usuarios/${id}/`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(userData),
     });
   },

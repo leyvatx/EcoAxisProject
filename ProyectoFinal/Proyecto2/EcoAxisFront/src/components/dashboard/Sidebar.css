@@ -73,18 +73,18 @@
 .sidebar-item.active {
   background: var(--primary-50);
   color: var(--primary-700);
-  border-left: 3px solid var(--primary-600);
 }
 
 .sidebar-item.active::before {
   content: '';
   position: absolute;
-  left: -var(--spacing-sm);
-  top: 0;
-  bottom: 0;
-  width: 3px;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
   background: var(--primary-600);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border-radius: 50%;
 }
 
 .sidebar-icon {

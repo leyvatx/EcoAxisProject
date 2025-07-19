@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import Sidebar from '../../../components/dashboard/Sidebar';
+import TopBar from '../../../components/dashboard/TopBar';
 import { catalogoAPI, productosEmpresasAPI, sucursalesAPI } from '../../../services/api';
-import DashboardLayout from '../../../components/dashboard/DashboardLayout';
+import { useError, useSuccess } from '../../../contexts/ErrorContext';
+import { validateForm } from '../../../utils/errorHandling';
+import ConfirmModal from '../../../components/UI/ConfirmModal';
 import './ProductosPage.css';
 
 const ProductosPage = () => {
@@ -10,6 +14,10 @@ const ProductosPage = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const { showError } = useError();
+  const { showSuccess } = useSuccess();
   const [formData, setFormData] = useState({
     alias_producto: '',
     horas_uso_diario: '',
@@ -21,12 +29,47 @@ const ProductosPage = () => {
 
   // Cargar datos iniciales
   useEffect(() => {
-    loadData();
-  }, []);
+    let isMounted = true;
+    
+    const loadInitialData = async () => {
+      try {
+        // Pequeño delay para suavizar la carga
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        if (!isMounted) return;
+        
+        setLoading(true);
+        const [productosData, catalogoData, sucursalesData] = await Promise.all([
+          productosEmpresasAPI.getAll(),
+          catalogoAPI.getAll(),
+          sucursalesAPI.getAll()
+        ]);
+        
+        if (isMounted) {
+          setProductos(productosData);
+          setCatalogo(catalogoData);
+          setSucursales(sucursalesData);
+        }
+      } catch (error) {
+        if (isMounted) {
+          showError('No se pudieron cargar los productos');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
 
-  const loadData = async () => {
+    loadInitialData();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [showError]);
+
+  const loadData = useCallback(async () => {
     try {
-      setLoading(true);
       const [productosData, catalogoData, sucursalesData] = await Promise.all([
         productosEmpresasAPI.getAll(),
         catalogoAPI.getAll(),
@@ -37,16 +80,20 @@ const ProductosPage = () => {
       setCatalogo(catalogoData);
       setSucursales(sucursalesData);
     } catch (error) {
-      console.error('Error loading data:', error);
-      alert('Error al cargar los datos');
-    } finally {
-      setLoading(false);
+      showError('No se pudieron cargar los productos');
     }
-  };
+  }, [showError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+    
     try {
+      setLoading(true);
+      
+      // Validar campos requeridos
+      validateForm(formData, ['alias_producto', 'horas_uso_diario', 'dias_uso_mensual', 'ubicacion', 'catalogo', 'sucursal']);
+      
       const dataToSubmit = {
         ...formData,
         horas_uso_diario: parseFloat(formData.horas_uso_diario),
@@ -57,16 +104,18 @@ const ProductosPage = () => {
 
       if (editingProduct) {
         await productosEmpresasAPI.update(editingProduct.id, dataToSubmit);
+        showSuccess('Producto actualizado correctamente');
       } else {
         await productosEmpresasAPI.create(dataToSubmit);
+        showSuccess('Producto creado correctamente');
       }
       
       await loadData();
       handleCloseModal();
-      alert(editingProduct ? 'Producto actualizado exitosamente' : 'Producto creado exitosamente');
     } catch (error) {
-      console.error('Error saving product:', error);
-      alert('Error al guardar el producto');
+      showError(error.message || (editingProduct ? 'No se pudo actualizar el producto' : 'No se pudo crear el producto'));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -84,15 +133,24 @@ const ProductosPage = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('¿Está seguro de que desea eliminar este producto?')) {
-      try {
-        await productosEmpresasAPI.delete(id);
-        await loadData();
-        alert('Producto eliminado exitosamente');
-      } catch (error) {
-        console.error('Error deleting product:', error);
-        alert('Error al eliminar el producto');
-      }
+    setProductToDelete(id);
+    setShowConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (loading) return;
+    
+    try {
+      setLoading(true);
+      await productosEmpresasAPI.delete(productToDelete);
+      await loadData();
+      showSuccess('Producto eliminado correctamente');
+    } catch (error) {
+      showError('No se pudo eliminar el producto');
+    } finally {
+      setLoading(false);
+      setShowConfirm(false);
+      setProductToDelete(null);
     }
   };
 
@@ -126,90 +184,129 @@ const ProductosPage = () => {
   };
 
   if (loading) {
-    return <div className="productos-loading">Cargando productos...</div>;
+    return (
+      <div className="dashboard">
+        <Sidebar />
+        <div className="dashboard-main">
+          <TopBar />
+          <div className="page-content">
+            <div className="productos-page">
+              <div className="loading-state">
+                <div className="spinner"></div>
+                <p>Cargando productos...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <DashboardLayout>
-      <div className="productos-page">
-        <div className="productos-header">
-          <h1>Gestión de Productos</h1>
-          <button 
-            className="btn-primary"
-            onClick={() => setShowModal(true)}
-          >
-            ➕ Nuevo Producto
-          </button>
-        </div>
+    <div className="dashboard">
+      <Sidebar />
+      <div className="dashboard-main">
+        <TopBar />
+        <div className="page-content">
+          <div className="productos-page">
+            <div className="page-header">
+              <div className="header-content">
+              </div>
+              <button 
+                className="btn-primary"
+                onClick={() => setShowModal(true)}
+                disabled={loading}
+              >
+                + Nuevo Producto
+              </button>
+            </div>
 
-      {/* Estadísticas */}
-      <div className="productos-stats">
-        <div className="stat-card">
-          <div className="stat-number">{productos.length}</div>
-          <div className="stat-label">Total Productos</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-number">{catalogo.length}</div>
-          <div className="stat-label">Equipos en Catálogo</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-number">{sucursales.length}</div>
-          <div className="stat-label">Sucursales Activas</div>
-        </div>
-      </div>
+            {/* Estadísticas */}
+            <div className="productos-stats">
+              <div className="stat-card">
+                <h3>Total Productos</h3>
+                <p className="stat-number">{productos.length}</p>
+              </div>
+              <div className="stat-card">
+                <h3>Equipos en Catálogo</h3>
+                <p className="stat-number">{catalogo.length}</p>
+              </div>
+              <div className="stat-card">
+                <h3>Sucursales Activas</h3>
+                <p className="stat-number">{sucursales.length}</p>
+              </div>
+            </div>
 
-      {/* Tabla de productos */}
-      <div className="productos-table-container">
-        <table className="productos-table">
-          <thead>
-            <tr>
-              <th>Alias del Producto</th>
-              <th>Equipo del Catálogo</th>
-              <th>Sucursal</th>
-              <th>Ubicación</th>
-              <th>Horas/Día</th>
-              <th>Días/Mes</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {productos.length === 0 ? (
-              <tr>
-                <td colSpan="7" className="no-data">
-                  No hay productos registrados
-                </td>
-              </tr>
-            ) : (
-              productos.map((producto) => (
-                <tr key={producto.id}>
-                  <td>{producto.alias_producto}</td>
-                  <td>{getCatalogoInfo(producto)}</td>
-                  <td>{getSucursalInfo(producto)}</td>
-                  <td>{producto.ubicacion}</td>
-                  <td>{producto.horas_uso_diario}h</td>
-                  <td>{producto.dias_uso_mensual} días</td>
-                  <td>
-                    <div className="action-buttons">
-                      <button 
-                        className="btn-edit"
-                        onClick={() => handleEdit(producto)}
-                      >
-                        ✏️
-                      </button>
-                      <button 
-                        className="btn-delete"
-                        onClick={() => handleDelete(producto.id)}
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+            <div className="card">
+              <div className="card-header">
+                <h3>Lista de Productos</h3>
+                <div className="card-actions">
+                  <input 
+                    type="text" 
+                    placeholder="Buscar productos..."
+                    className="search-input"
+                  />
+                </div>
+              </div>
+              
+              <div className="card-content">
+                <div className="table-container">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Alias del Producto</th>
+                        <th>Equipo del Catálogo</th>
+                        <th>Sucursal</th>
+                        <th>Ubicación</th>
+                        <th>Horas/Día</th>
+                        <th>Días/Mes</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {productos.length === 0 ? (
+                        <tr>
+                          <td colSpan="7" className="no-data">
+                            No hay productos registrados
+                          </td>
+                        </tr>
+                      ) : (
+                        productos.map((producto) => (
+                          <tr key={producto.id}>
+                            <td>{producto.alias_producto}</td>
+                            <td>{getCatalogoInfo(producto)}</td>
+                            <td>{getSucursalInfo(producto)}</td>
+                            <td>{producto.ubicacion}</td>
+                            <td>{producto.horas_uso_diario}h</td>
+                            <td>{producto.dias_uso_mensual} días</td>
+                            <td>
+                              <div className="action-buttons">
+                                <button 
+                                  className="btn-icon btn-edit"
+                                  onClick={() => handleEdit(producto)}
+                                  disabled={loading}
+                                  title="Editar"
+                                >
+                                  ✏️
+                                </button>
+                                <button 
+                                  className="btn-icon btn-delete"
+                                  onClick={() => handleDelete(producto.id)}
+                                  disabled={loading}
+                                  title="Eliminar"
+                                >
+                                  🗑️
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
 
       {/* Modal */}
       {showModal && (
@@ -310,19 +407,31 @@ const ProductosPage = () => {
               </div>
 
               <div className="form-actions">
-                <button type="button" className="btn-cancel" onClick={handleCloseModal}>
+                <button type="button" className="btn-cancel" onClick={handleCloseModal} disabled={loading}>
                   Cancelar
                 </button>
-                <button type="submit" className="btn-submit">
-                  {editingProduct ? 'Actualizar' : 'Crear'} Producto
+                <button type="submit" className="btn-submit" disabled={loading}>
+                  {loading ? 'Procesando...' : (editingProduct ? 'Actualizar' : 'Crear')} Producto
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+            <ConfirmModal
+              isOpen={showConfirm}
+              message="¿Estás seguro de eliminar este producto?"
+              onConfirm={confirmDelete}
+              onCancel={() => {
+                setShowConfirm(false);
+                setProductToDelete(null);
+              }}
+            />
+          </div>
+        </div>
       </div>
-    </DashboardLayout>
+    </div>
   );
 };
 

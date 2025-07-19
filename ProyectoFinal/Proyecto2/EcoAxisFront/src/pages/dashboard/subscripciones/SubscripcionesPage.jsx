@@ -114,8 +114,6 @@ const SubscripcionesPage = () => {
           <div className="subscripciones-page">
             <div className="page-header">
               <div className="header-content">
-                <h1>Gestión de Suscripciones</h1>
-                <p>Administra las suscripciones de las empresas</p>
               </div>
               <button 
                 className="btn-primary"

@@ -121,8 +121,6 @@ const SucursalesPage = () => {
           <div className="sucursales-page">
             <div className="page-header">
               <div className="header-content">
-                <h1>Gestión de Sucursales</h1>
-                <p>Administra las sucursales de las empresas</p>
               </div>
               <button 
                 className="btn-primary"

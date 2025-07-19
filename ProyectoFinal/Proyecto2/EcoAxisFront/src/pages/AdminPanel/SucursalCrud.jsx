@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useError } from '../../contexts/ErrorContext';
+import { handleApiResponse, validateForm } from '../../utils/errorHandling';
 import './SucursalCrud.css';
 
 const SucursalCrud = () => {
@@ -13,12 +15,18 @@ const [form, setForm] = useState({
     empresaId: 1
 });
 const [editId, setEditId] = useState(null);
+const [loading, setLoading] = useState(false);
+const { showError } = useError();
 const API_URL = 'http://localhost:3000/sucursal';
 
 const getSucursales = async () => {
-    const res = await fetch(API_URL);
-    const data = await res.json();
-    setSucursales(data);
+    try {
+        const res = await fetch(API_URL);
+        const data = await handleApiResponse(res);
+        setSucursales(data);
+    } catch (error) {
+        showError('No se pudieron cargar las sucursales');
+    }
 };
 
 useEffect(() => {
@@ -30,26 +38,41 @@ const handleChange = (e) => {
 };
 
 const handleSubmit = async () => {
-    const method = editId ? 'PUT' : 'POST';
-    const url = editId ? `${API_URL}/${editId}` : API_URL;
+    if (loading) return;
+    
+    try {
+        setLoading(true);
+        
+        // Validar campos requeridos
+        validateForm(form, ['nombre', 'colonia', 'calle', 'cp']);
+        
+        const method = editId ? 'PUT' : 'POST';
+        const url = editId ? `${API_URL}/${editId}` : API_URL;
 
-    await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
-    });
+        const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(form)
+        });
 
-    setForm({
-        nombre: '',
-        colonia: '',
-        calle: '',
-        cp: '',
-        num_ext: '',
-        num_int: '',
-        empresaId: 1
-    });
-    setEditId(null);
-    getSucursales();
+        await handleApiResponse(res);
+
+        setForm({
+            nombre: '',
+            colonia: '',
+            calle: '',
+            cp: '',
+            num_ext: '',
+            num_int: '',
+            empresaId: 1
+        });
+        setEditId(null);
+        await getSucursales();
+    } catch (error) {
+        showError(error.message || (editId ? 'No se pudo actualizar la sucursal' : 'No se pudo crear la sucursal'));
+    } finally {
+        setLoading(false);
+    }
 };
 
 const handleEdit = (sucursal) => {
@@ -58,8 +81,18 @@ const handleEdit = (sucursal) => {
 };
 
 const handleDelete = async (id) => {
-    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-    getSucursales();
+    if (loading) return;
+    
+    try {
+        setLoading(true);
+        const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        await handleApiResponse(res);
+        await getSucursales();
+    } catch (error) {
+        showError('No se pudo eliminar la sucursal');
+    } finally {
+        setLoading(false);
+    }
 };
 
 return (
@@ -74,8 +107,8 @@ return (
             <input name="num_ext" placeholder="Número externo" value={form.num_ext} onChange={handleChange} />
             <input name="num_int" placeholder="Número interno" value={form.num_int} onChange={handleChange} />
 
-            <button type="button" className="submit-btn" onClick={handleSubmit}>
-                {editId ? 'Actualizar' : 'Agregar'}
+            <button type="button" className="submit-btn" onClick={handleSubmit} disabled={loading}>
+                {loading ? 'Procesando...' : (editId ? 'Actualizar' : 'Agregar')}
             </button>
         </form>
 
@@ -90,8 +123,10 @@ return (
                 <p>CP: {s.cp} | Int: {s.num_int ?? 'N/A'}</p>
             </div>
             <div className="btn-group">
-                <button className="edit-btn" onClick={() => handleEdit(s)}>Editar</button>
-                <button className="delete-btn" onClick={() => handleDelete(s.id)}>Eliminar</button>
+                <button className="edit-btn" onClick={() => handleEdit(s)} disabled={loading}>Editar</button>
+                <button className="delete-btn" onClick={() => handleDelete(s.id)} disabled={loading}>
+                    {loading ? '...' : 'Eliminar'}
+                </button>
             </div>
             </li>
         ))}

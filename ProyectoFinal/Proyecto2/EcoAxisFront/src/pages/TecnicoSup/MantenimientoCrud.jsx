@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-
+import { useError } from '../../contexts/ErrorContext';
+import { handleApiResponse, validateForm } from '../../utils/errorHandling';
 import './Mantenimiento.css';
 
 const MantenimientoCrud = () => {
     const [mantenimientos, setMantenimientos] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
     const [form, setForm] = useState({
         fecha_mantenimiento: '',
         tipo_mantenimiento: '',
@@ -16,24 +15,17 @@ const MantenimientoCrud = () => {
         tecnico: '',
     });
     const [editId, setEditId] = useState(null);
+    const { showError } = useError();
     const API_URL = 'http://127.0.0.1:8000/api/mantenimientos/';
 
     const getMantenimientos = async () => {
         try {
             setLoading(true);
-            setError('');
             const res = await fetch(API_URL);
-            
-            if (!res.ok) {
-                throw new Error(`Error ${res.status}: ${res.statusText}`);
-            }
-            
-            const data = await res.json();
+            const data = await handleApiResponse(res);
             setMantenimientos(data);
-            console.log('Mantenimientos cargados:', data);
         } catch (error) {
-            console.error('Error al cargar mantenimientos:', error);
-            setError('Error al cargar los datos: ' + error.message);
+            showError('No se pudieron cargar los mantenimientos');
         } finally {
             setLoading(false);
         }
@@ -48,17 +40,16 @@ const MantenimientoCrud = () => {
     };
 
     const handleSubmit = async () => {
+        if (loading) return;
+        
         try {
             setLoading(true);
-            setError('');
-            setSuccess('');
+            
+            // Validar campos requeridos
+            validateForm(form, ['fecha_mantenimiento', 'tipo_mantenimiento', 'estado_equipo', 'proximo_mantenimiento', 'producto_empresa', 'tecnico']);
             
             const method = editId ? 'PUT' : 'POST';
-            const url = editId ? `${API_URL}/${editId}` : API_URL;
-
-            console.log('Enviando datos:', form);
-            console.log('URL:', url);
-            console.log('Método:', method);
+            const url = editId ? `${API_URL}${editId}/` : API_URL;
 
             const response = await fetch(url, {
                 method,
@@ -66,12 +57,7 @@ const MantenimientoCrud = () => {
                 body: JSON.stringify(form)
             });
 
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
-            }
-
-            const result = await response.json();
-            console.log('Respuesta del servidor:', result);
+            await handleApiResponse(response);
 
             setForm({
                 fecha_mantenimiento: '',
@@ -82,12 +68,10 @@ const MantenimientoCrud = () => {
                 tecnico: '',
             });
             setEditId(null);
-            setSuccess(editId ? 'Mantenimiento actualizado correctamente' : 'Mantenimiento agregado correctamente');
             
             await getMantenimientos();
         } catch (error) {
-            console.error('Error al guardar:', error);
-            setError('Error al guardar: ' + error.message);
+            showError(error.message || (editId ? 'No se pudo actualizar el mantenimiento' : 'No se pudo crear el mantenimiento'));
         } finally {
             setLoading(false);
         }
@@ -99,32 +83,23 @@ const MantenimientoCrud = () => {
     };
 
     const handleDelete = async (id) => {
+        if (loading) return;
+        
         try {
-            setError('');
-            setSuccess('');
-            
-            const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-            
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
-            }
-            
-            setSuccess('Mantenimiento eliminado correctamente');
+            setLoading(true);
+            const response = await fetch(`${API_URL}${id}/`, { method: 'DELETE' });
+            await handleApiResponse(response);
             await getMantenimientos();
         } catch (error) {
-            console.error('Error al eliminar:', error);
-            setError('Error al eliminar: ' + error.message);
+            showError('No se pudo eliminar el mantenimiento');
+        } finally {
+            setLoading(false);
         }
     };
 
     return(
         <div className="mantenimiento-container">
             <h2>Gestión de Mantenimientos</h2>
-
-            {/* Mensajes de estado */}
-            {error && <div className="message error">{error}</div>}
-            {success && <div className="message success">{success}</div>}
-            {loading && <div className="message loading">Cargando...</div>}
 
             <form>
                 
@@ -232,14 +207,16 @@ const MantenimientoCrud = () => {
                                         <button 
                                             className="btn-edit" 
                                             onClick={() => handleEdit(mant)}
+                                            disabled={loading}
                                         >
                                             Editar
                                         </button>
                                         <button 
                                             className="btn-delete" 
                                             onClick={() => handleDelete(mant.id)}
+                                            disabled={loading}
                                         >
-                                            Eliminar
+                                            {loading ? '...' : 'Eliminar'}
                                         </button>
                                     </td>
                                 </tr>

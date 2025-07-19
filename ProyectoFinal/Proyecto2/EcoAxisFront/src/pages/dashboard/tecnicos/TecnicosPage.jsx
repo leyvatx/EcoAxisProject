@@ -143,8 +143,6 @@ const TecnicosPage = () => {
           <div className="tecnicos-page">
             <div className="page-header">
               <div className="header-content">
-                <h1>Gestión de Técnicos</h1>
-                <p>Administra los técnicos especializados</p>
               </div>
               <button 
                 className="btn-primary"
@@ -193,38 +191,88 @@ const TecnicosPage = () => {
                     <div className="spinner"></div>
                     <p>Cargando técnicos...</p>
                   </div>
+                ) : tecnicos.length === 0 ? (
+                  <div className="empty-state">
+                    <h3>No hay técnicos registrados</h3>
+                    <p>Agrega el primer técnico para comenzar</p>
+                  </div>
                 ) : (
-                  <div className="tecnicos-grid">
-                    {tecnicos.map(tecnico => (
-                      <div key={tecnico.id} className="tecnico-card">
-                        <div className="tecnico-avatar">
-                          {tecnico.nombres?.[0]}{tecnico.apellidos?.[0]}
-                        </div>
-                        <h3>{tecnico.nombres} {tecnico.apellidos}</h3>
-                        <p className="especialidad">{tecnico.especialidad || 'Sin especialidad'}</p>
-                        <p className="email">{tecnico.email_user}</p>
-                        <p className="telefono">{tecnico.telefono}</p>
-                        <div className="tecnico-status">
-                          <span className={`status-badge ${tecnico.is_active ? 'active' : 'inactive'}`}>
-                            {tecnico.is_active ? 'Disponible' : 'No disponible'}
-                          </span>
-                        </div>
-                        <div className="tecnico-actions">
-                          <button 
-                            className="btn-edit"
-                            onClick={() => handleEdit(tecnico)}
-                          >
-                            Editar
-                          </button>
-                          <button 
-                            className="btn-delete"
-                            onClick={() => handleDelete(tecnico.id)}
-                          >
-                            Eliminar
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="tecnicos-table-container">
+                    <table className="tecnicos-table">
+                      <thead>
+                        <tr>
+                          <th>Foto</th>
+                          <th>Nombre</th>
+                          <th>Especialidad</th>
+                          <th>Email</th>
+                          <th>Teléfono</th>
+                          <th>Tipo</th>
+                          <th>Estado</th>
+                          <th>Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {tecnicos.map(tecnico => (
+                          <tr key={tecnico.id}>
+                            <td>
+                              <div className="tecnico-avatar">
+                                <img 
+                                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face&auto=format" 
+                                  alt={`${tecnico.nombres} ${tecnico.apellidos}`}
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'flex';
+                                  }}
+                                />
+                                <div className="avatar-fallback" style={{display: 'none'}}>
+                                  👷‍♂️
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <div className="tecnico-name-cell">
+                                <strong>{tecnico.nombres} {tecnico.apellidos}</strong>
+                              </div>
+                            </td>
+                            <td>
+                              <span className="especialidad-badge">
+                                {tecnico.especialidad || 'Sin especialidad'}
+                              </span>
+                            </td>
+                            <td>{tecnico.email_user}</td>
+                            <td>{tecnico.telefono}</td>
+                            <td>
+                              <span className="tipo-badge">
+                                {tecnico.tipo_tecnico || 'N/A'}
+                              </span>
+                            </td>
+                            <td>
+                              <span className={`status-badge ${tecnico.is_active ? 'active' : 'inactive'}`}>
+                                {tecnico.is_active ? 'Disponible' : 'No disponible'}
+                              </span>
+                            </td>
+                            <td>
+                              <div className="action-buttons">
+                                <button 
+                                  className="btn-icon btn-edit"
+                                  onClick={() => handleEdit(tecnico)}
+                                  title="Editar"
+                                >
+                                  ✏️
+                                </button>
+                                <button 
+                                  className="btn-icon btn-delete"
+                                  onClick={() => handleDelete(tecnico.id)}
+                                  title="Eliminar"
+                                >
+                                  🗑️
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </div>
@@ -356,7 +404,6 @@ const TecnicosPage = () => {
                   >
                     <option value="">Seleccionar tipo</option>
                     <option value="1">Técnico Superior</option>
-                    <option value="2">Técnico Mantenimiento</option>
                   </select>
                 </div>
               </div>

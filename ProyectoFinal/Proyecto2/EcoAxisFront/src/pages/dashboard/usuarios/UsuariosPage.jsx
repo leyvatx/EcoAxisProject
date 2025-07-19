@@ -47,15 +47,31 @@ const UsuariosPage = () => {
     e.preventDefault();
     try {
       if (editingUsuario) {
-        await usuariosAPI.update(editingUsuario.id, formData);
+        // Para edición, crear una copia del formData
+        const updateData = { ...formData };
+        
+        // Si la contraseña está vacía, no la incluir en la actualización
+        if (!formData.password || formData.password.trim() === '') {
+          delete updateData.password;
+        }
+        
+        console.log('Datos a enviar para actualización:', updateData);
+        await usuariosAPI.update(editingUsuario.id, updateData);
       } else {
+        // Para creación, verificar que todos los campos requeridos estén presentes
+        if (!formData.password || formData.password.trim() === '') {
+          setError('La contraseña es requerida para crear un nuevo usuario');
+          return;
+        }
+        console.log('Datos a enviar para creación:', formData);
         await usuariosAPI.create(formData);
       }
       await fetchUsuarios();
       handleCloseModal();
+      setError(''); // Limpiar errores previos
     } catch (error) {
       console.error('Error saving usuario:', error);
-      setError('Error al guardar el usuario');
+      setError('Error al guardar el usuario: ' + (error.message || 'Error desconocido'));
     }
   };
 
@@ -102,7 +118,7 @@ const UsuariosPage = () => {
           <div className="usuarios-page">
             <div className="page-header">
               <div className="header-content">
-                <h1>Gestión de Usuarios</h1>
+                <h2>Gestión de Usuarios</h2>
                 <p>Administra los usuarios del sistema</p>
               </div>
               <button 
@@ -125,8 +141,12 @@ const UsuariosPage = () => {
                 <p className="stat-number">{usuarios.length}</p>
               </div>
               <div className="stat-card">
-                <h3>Usuarios Activos</h3>
+                <h3>Activos</h3>
                 <p className="stat-number">{usuarios.filter(u => u.is_active).length}</p>
+              </div>
+              <div className="stat-card">
+                <h3>Administradores</h3>
+                <p className="stat-number">{usuarios.filter(u => u.is_staff).length}</p>
               </div>
             </div>
 
@@ -148,13 +168,20 @@ const UsuariosPage = () => {
                     <div className="spinner"></div>
                     <p>Cargando usuarios...</p>
                   </div>
+                ) : usuarios.length === 0 ? (
+                  <div className="empty-state">
+                    <h3>No hay usuarios registrados</h3>
+                    <p>Agrega el primer usuario para comenzar</p>
+                  </div>
                 ) : (
-                  <div className="table-container">
-                    <table className="data-table">
+                  <div className="usuarios-table-container">
+                    <table className="usuarios-table">
                       <thead>
                         <tr>
-                          <th>Usuario</th>
+                          <th>Foto</th>
+                          <th>Nombre</th>
                           <th>Email</th>
+                          <th>Rol</th>
                           <th>Estado</th>
                           <th>Acciones</th>
                         </tr>
@@ -163,21 +190,34 @@ const UsuariosPage = () => {
                         {usuarios.map(usuario => (
                           <tr key={usuario.id}>
                             <td>
-                              <div className="user-info">
-                                <div className="user-avatar">
-                                  {usuario.nombres?.[0]}{usuario.apellidos?.[0]}
+                              <div className="usuario-avatar">
+                                <img 
+                                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face&auto=format" 
+                                  alt={`${usuario.nombres} ${usuario.apellidos}`}
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'flex';
+                                  }}
+                                />
+                                <div className="avatar-fallback" style={{display: 'none'}}>
+                                  👤
                                 </div>
-                                <div>
-                                  <div className="user-name">
-                                    {usuario.nombres} {usuario.apellidos}
-                                  </div>
-                                  <div className="user-id">
-                                    ID: {usuario.user_uuid?.slice(0, 8)}...
-                                  </div>
+                              </div>
+                            </td>
+                            <td>
+                              <div className="usuario-name-cell">
+                                <strong>{usuario.nombres} {usuario.apellidos}</strong>
+                                <div className="user-id">
+                                  ID: {usuario.user_uuid?.slice(0, 8)}...
                                 </div>
                               </div>
                             </td>
                             <td>{usuario.email_user}</td>
+                            <td>
+                              <span className={`role-badge ${usuario.is_superuser ? 'superuser' : usuario.is_staff ? 'staff' : 'user'}`}>
+                                {usuario.is_superuser ? 'Super Admin' : usuario.is_staff ? 'Staff' : 'Usuario'}
+                              </span>
+                            </td>
                             <td>
                               <span className={`status-badge ${usuario.is_active ? 'active' : 'inactive'}`}>
                                 {usuario.is_active ? 'Activo' : 'Inactivo'}
@@ -268,6 +308,7 @@ const UsuariosPage = () => {
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
+                    placeholder={editingUsuario ? 'Dejar vacío para mantener la actual' : 'Ingrese la contraseña'}
                     required={!editingUsuario}
                   />
                 </div>

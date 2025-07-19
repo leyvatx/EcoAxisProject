@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('tipo_tecnico_uuid', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
-                ('rol_tecnico', models.CharField(choices=[('Tecnico Superior', 'Tecnico Superior'), ('Tecnico Mantenimiento', 'Tecnico Mantenimiento')], max_length=50)),
+                ('rol_tecnico', models.CharField(choices=[('Tecnico Superior', 'Tecnico Superior')], max_length=50)),
             ],
             options={
                 'db_table': 'tipo_tecnico',
