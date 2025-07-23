@@ -41,7 +41,6 @@ class TecnicoViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(creado_por=self.request.user)
-        serializer.save(creado_por=self.request.user)
 
 class RegistroUsuarioView(APIView):
     permission_classes = []  # Permitir acceso público

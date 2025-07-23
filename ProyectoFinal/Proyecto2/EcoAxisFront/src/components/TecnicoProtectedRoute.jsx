@@ -31,7 +31,7 @@ const TecnicoProtectedRoute = ({ children }) => {
 
   // Si no hay técnico autenticado, redirigir al login
   if (!tecnico || !tecnicoToken) {
-    return <Navigate to="/tecnico-login" replace />;
+    return <Navigate to="/tecnico/login" replace />;
   }
 
   // Si está autenticado, mostrar el contenido protegido

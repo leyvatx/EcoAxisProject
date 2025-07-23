@@ -1,0 +1,27 @@
+/* TecnicoLayout.css */
+.tecnico-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.tecnico-main-content {
+  flex: 1;
+  margin-left: 280px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.tecnico-content-area {
+  flex: 1;
+  overflow-y: auto;
+  background: #f8fafc;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tecnico-main-content {
+    margin-left: 0;
+  }
+}

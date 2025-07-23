@@ -1,7 +1,7 @@
 // Configuración centralizada de API para EcoAxis
 const API_BASE_URL = 'http://localhost:8000/api';
 
-// Función helper para hacer peticiones HTTP
+// Función helper para hacer peticiones HTTP (usuarios normales)
 async function apiRequest(endpoint, options = {}) {
   const token = localStorage.getItem('token');
   const defaultHeaders = {
@@ -38,6 +38,86 @@ async function apiRequest(endpoint, options = {}) {
   } catch (error) {
     console.error('API Request failed:', error);
     throw error;
+  }
+}
+
+// Función helper para hacer peticiones HTTP (técnicos)
+async function tecnicoApiRequest(endpoint, options = {}) {
+  const tecnicoToken = localStorage.getItem('tecnicoToken');
+  const defaultHeaders = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+
+  if (tecnicoToken) {
+    defaultHeaders['Authorization'] = `Bearer ${tecnicoToken}`;
+  }
+
+  const config = {
+    method: 'GET',
+    headers: defaultHeaders,
+    ...options,
+    headers: { ...defaultHeaders, ...options.headers },
+  };
+
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    
+    // Si el token expiró, intentar refrescar
+    if (response.status === 401 && tecnicoToken) {
+      const refreshResult = await refreshTecnicoToken();
+      if (refreshResult.success) {
+        // Reintentar con nuevo token
+        defaultHeaders['Authorization'] = `Bearer ${refreshResult.token}`;
+        const newConfig = {
+          ...config,
+          headers: { ...config.headers, ...defaultHeaders }
+        };
+        const retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, newConfig);
+        if (retryResponse.ok) {
+          return await retryResponse.json();
+        }
+      }
+      throw new Error('Authentication failed');
+    }
+    
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorData}`);
+    }
+    
+    const contentType = response.headers.get('content-type');
+    if (response.status === 204 || !contentType || !contentType.includes('application/json')) {
+      return {};
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Tecnico API request error:', error);
+    throw error;
+  }
+}
+
+// Función para refrescar token de técnico
+async function refreshTecnicoToken() {
+  try {
+    const refreshToken = localStorage.getItem('tecnicoRefreshToken');
+    if (!refreshToken) return { success: false };
+
+    const response = await fetch(`${API_BASE_URL}/auth/tecnico/refresh/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh: refreshToken }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem('tecnicoToken', data.access);
+      return { success: true, token: data.access };
+    }
+    return { success: false };
+  } catch {
+    return { success: false };
   }
 }
 

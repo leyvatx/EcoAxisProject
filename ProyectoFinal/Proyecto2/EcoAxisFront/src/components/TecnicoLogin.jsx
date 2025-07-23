@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTecnicoAuth } from '../../contexts/TecnicoAuthContext';
+import { useTecnicoAuth } from '../contexts/TecnicoAuthContext';
 import { useNavigate } from 'react-router-dom';
 import './TecnicoLogin.css';
 
@@ -32,7 +32,7 @@ const TecnicoLogin = () => {
       
       if (result.success) {
         console.log('✅ Login exitoso, redirigiendo...');
-        navigate('/tecnico-dashboard');
+        navigate('/tecnico/dashboard');
       } else {
         setError(result.error || 'Error en el login');
       }

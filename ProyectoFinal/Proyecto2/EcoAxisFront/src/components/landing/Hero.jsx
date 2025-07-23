@@ -26,7 +26,13 @@ const Hero = () => {
               className="btn btn-outline btn-lg"
               onClick={() => navigate('/login')}
             >
-              Ver Demo
+              Iniciar Sesión
+            </button>
+            <button 
+              className="btn btn-secondary btn-lg"
+              onClick={() => navigate('/tecnico/login')}
+            >
+              Acceso Técnicos
             </button>
           </div>
         </div>

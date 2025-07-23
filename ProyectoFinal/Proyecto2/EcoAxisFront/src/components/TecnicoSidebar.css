@@ -1,0 +1,281 @@
+/* Tecnico Sidebar Styles */
+.tecnico-sidebar {
+  width: 280px;
+  height: 100vh;
+  background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  overflow-x: hidden;
+  backdrop-filter: blur(10px);
+}
+
+/* Header del Sidebar */
+.sidebar-header {
+  padding: 24px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  font-size: 2rem;
+  background: rgba(255, 255, 255, 0.2);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.logo-text h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.logo-text span {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  font-weight: 400;
+}
+
+/* Información del Técnico */
+.tecnico-info {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.tecnico-avatar {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.tecnico-details h4 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.tecnico-role {
+  margin: 0 0 2px 0;
+  font-size: 0.8rem;
+  color: #bfdbfe;
+  font-weight: 500;
+}
+
+.tecnico-empresa {
+  margin: 0;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+/* Navegación */
+.sidebar-nav {
+  flex: 1;
+  padding: 20px 0;
+}
+
+.nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-item {
+  margin-bottom: 2px;
+}
+
+.nav-link {
+  width: 100%;
+  background: none;
+  border: none;
+  color: white;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+  border-radius: 0;
+  position: relative;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+}
+
+.nav-link:hover {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+  border-left-color: rgba(255, 255, 255, 0.4);
+  transform: translateX(2px);
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  border-left-color: #60a5fa;
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.nav-icon {
+  font-size: 1.3rem;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.nav-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.nav-description {
+  font-size: 0.75rem;
+  opacity: 0.9;
+  line-height: 1.2;
+  color: #bfdbfe;
+}
+
+.nav-arrow {
+  opacity: 0;
+  transition: all 0.3s ease;
+  font-size: 0.8rem;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.nav-link:hover .nav-arrow {
+  opacity: 0.8;
+  transform: translateX(4px);
+}
+
+.nav-link.active .nav-arrow {
+  opacity: 1;
+}
+
+/* Footer del Sidebar */
+.sidebar-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 0;
+}
+
+.footer-section {
+  margin-bottom: 4px;
+}
+
+.logout-link:hover {
+  background: rgba(255, 87, 87, 0.2) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tecnico-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .tecnico-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+}
+
+/* Scrollbar personalizado */
+.tecnico-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tecnico-sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tecnico-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.tecnico-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Animaciones */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.tecnico-sidebar {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Estados de hover mejorados */
+.nav-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: white;
+  transform: scaleY(0);
+  transition: transform 0.2s ease;
+}
+
+.nav-link:hover::before {
+  transform: scaleY(1);
+}
+
+.nav-link.active::before {
+  transform: scaleY(1);
+  background: #fff;
+}

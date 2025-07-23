@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../../../components/dashboard/Sidebar';
 import TopBar from '../../../components/dashboard/TopBar';
 import { useAuth } from '../../../contexts/AuthContext';
-import { tecnicosAPI, empresasAPI, sucursalesAPI } from '../../../services/api';
+import { tecnicosAPI, empresasAPI, sucursalesAPI, tiposTecnicoAPI } from '../../../services/api';
 import './TecnicosPage.css';
 
 const TecnicosPage = () => {
@@ -10,6 +10,7 @@ const TecnicosPage = () => {
   const [tecnicos, setTecnicos] = useState([]);
   const [empresas, setEmpresas] = useState([]);
   const [sucursales, setSucursales] = useState([]);
+  const [tiposTecnico, setTiposTecnico] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -18,8 +19,8 @@ const TecnicosPage = () => {
     nombres: '',
     apellidos: '',
     email_user: '',
+    password: '',
     telefono: '',
-    especialidad: '',
     sucursal: '',
     empresa: '',
     tipo_tecnico: ''
@@ -28,6 +29,7 @@ const TecnicosPage = () => {
   useEffect(() => {
     fetchTecnicos();
     fetchEmpresas();
+    fetchTiposTecnico();
   }, []);
 
   const fetchTecnicos = async () => {
@@ -49,6 +51,17 @@ const TecnicosPage = () => {
       setEmpresas(data);
     } catch (error) {
       console.error('Error fetching empresas:', error);
+    }
+  };
+
+  const fetchTiposTecnico = async () => {
+    try {
+      console.log('Fetching tipos de tecnico...');
+      const data = await tiposTecnicoAPI.getAll();
+      console.log('Tipos de tecnico received:', data);
+      setTiposTecnico(data);
+    } catch (error) {
+      console.error('Error fetching tipos tecnico:', error);
     }
   };
 
@@ -79,9 +92,20 @@ const TecnicosPage = () => {
     e.preventDefault();
     try {
       const tecnicoData = { ...formData };
+      
+      // Si estamos editando y no se proporcionó nueva contraseña, no enviar el campo password
+      if (editingTecnico && !tecnicoData.password) {
+        delete tecnicoData.password;
+      }
+      
       if (editingTecnico) {
         await tecnicosAPI.update(editingTecnico.id, tecnicoData);
       } else {
+        // Al crear, la contraseña es obligatoria
+        if (!tecnicoData.password) {
+          setError('La contraseña es obligatoria para nuevos técnicos');
+          return;
+        }
         await tecnicosAPI.create(tecnicoData);
       }
       await fetchTecnicos();
@@ -98,8 +122,8 @@ const TecnicosPage = () => {
       nombres: tecnico.nombres,
       apellidos: tecnico.apellidos,
       email_user: tecnico.email_user,
+      password: '', // No mostrar la contraseña existente
       telefono: tecnico.telefono,
-      especialidad: tecnico.especialidad || '',
       sucursal: tecnico.sucursal || '',
       empresa: tecnico.empresa || '',
       tipo_tecnico: tecnico.tipo_tecnico || ''
@@ -126,8 +150,8 @@ const TecnicosPage = () => {
       nombres: '',
       apellidos: '',
       email_user: '',
+      password: '',
       telefono: '',
-      especialidad: '',
       sucursal: '',
       empresa: '',
       tipo_tecnico: ''
@@ -168,8 +192,8 @@ const TecnicosPage = () => {
                 <p className="stat-number">{tecnicos.filter(t => t.is_active).length}</p>
               </div>
               <div className="stat-card">
-                <h3>Especialidades</h3>
-                <p className="stat-number">{[...new Set(tecnicos.map(t => t.especialidad).filter(Boolean))].length}</p>
+                <h3>Tipos de Técnico</h3>
+                <p className="stat-number">{tiposTecnico.length}</p>
               </div>
             </div>
 
@@ -203,7 +227,6 @@ const TecnicosPage = () => {
                         <tr>
                           <th>Foto</th>
                           <th>Nombre</th>
-                          <th>Especialidad</th>
                           <th>Email</th>
                           <th>Teléfono</th>
                           <th>Tipo</th>
@@ -233,11 +256,6 @@ const TecnicosPage = () => {
                               <div className="tecnico-name-cell">
                                 <strong>{tecnico.nombres} {tecnico.apellidos}</strong>
                               </div>
-                            </td>
-                            <td>
-                              <span className="especialidad-badge">
-                                {tecnico.especialidad || 'Sin especialidad'}
-                              </span>
                             </td>
                             <td>{tecnico.email_user}</td>
                             <td>{tecnico.telefono}</td>
@@ -285,7 +303,20 @@ const TecnicosPage = () => {
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
-              <h3>{editingTecnico ? 'Editar Técnico' : 'Nuevo Técnico'}</h3>
+              <div className="modal-title">
+                <div className="title-icon">
+                  {editingTecnico ? '✏️' : '👷‍♂️'}
+                </div>
+                <div>
+                  <h3>{editingTecnico ? 'Editar Técnico' : 'Nuevo Técnico'}</h3>
+                  <p className="modal-subtitle">
+                    {editingTecnico 
+                      ? 'Modifica la información del técnico' 
+                      : 'Completa los datos para registrar un nuevo técnico'
+                    }
+                  </p>
+                </div>
+              </div>
               <button 
                 className="btn-close"
                 onClick={handleCloseModal}
@@ -295,116 +326,159 @@ const TecnicosPage = () => {
             </div>
             
             <form onSubmit={handleSubmit} className="modal-body">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Nombre *</label>
-                  <input
-                    type="text"
-                    name="nombres"
-                    value={formData.nombres}
-                    onChange={handleInputChange}
-                    required
-                  />
+              <div className="form-section">
+                <h4 className="section-title">📋 Información Personal</h4>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Nombre *</label>
+                    <input
+                      type="text"
+                      name="nombres"
+                      value={formData.nombres}
+                      onChange={handleInputChange}
+                      placeholder="Ej. Juan Carlos"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Apellido *</label>
+                    <input
+                      type="text"
+                      name="apellidos"
+                      value={formData.apellidos}
+                      onChange={handleInputChange}
+                      placeholder="Ej. García López"
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label>Apellido *</label>
-                  <input
-                    type="text"
-                    name="apellidos"
-                    value={formData.apellidos}
-                    onChange={handleInputChange}
-                    required
-                  />
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Email *</label>
+                    <input
+                      type="email"
+                      name="email_user"
+                      value={formData.email_user}
+                      onChange={handleInputChange}
+                      placeholder="Ej. juan.garcia@empresa.com"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Teléfono *</label>
+                    <input
+                      type="tel"
+                      name="telefono"
+                      value={formData.telefono}
+                      onChange={handleInputChange}
+                      placeholder="Ej. 664-123-4567"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Email *</label>
-                  <input
-                    type="email"
-                    name="email_user"
-                    value={formData.email_user}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Teléfono *</label>
-                  <input
-                    type="tel"
-                    name="telefono"
-                    value={formData.telefono}
-                    onChange={handleInputChange}
-                    required
-                  />
+              <div className="form-section">
+                <h4 className="section-title">🔐 Acceso al Sistema</h4>
+                <div className="password-section">
+                  <div className="form-group">
+                    <label>Contraseña {editingTecnico ? '(opcional)' : '*'}</label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      placeholder={editingTecnico ? "••••••••" : "Mínimo 8 caracteres"}
+                      required={!editingTecnico}
+                    />
+                    <div className="password-help">
+                      {editingTecnico ? (
+                        <div className="help-text">
+                          <span className="help-icon">💡</span>
+                          Deja vacío para mantener la contraseña actual
+                        </div>
+                      ) : (
+                        <div className="password-requirements">
+                          <div className="help-text">
+                            <span className="help-icon">🔒</span>
+                            La contraseña debe tener:
+                          </div>
+                          <ul className="requirements-list">
+                            <li>• Mínimo 8 caracteres</li>
+                            <li>• Al menos una letra y un número</li>
+                            <li>• Evita caracteres especiales complejos</li>
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Empresa *</label>
-                  <select
-                    name="empresa"
-                    value={formData.empresa}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Seleccionar empresa</option>
-                    {empresas.map(empresa => (
-                      <option key={empresa.id} value={empresa.id}>
-                        {empresa.nombre_empresa}
+              <div className="form-section">
+                <h4 className="section-title">🏢 Información Laboral</h4>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Tipo de Técnico *</label>
+                    <select
+                      name="tipo_tecnico"
+                      value={formData.tipo_tecnico}
+                      onChange={handleInputChange}
+                      required
+                    >
+                      <option value="">Seleccionar tipo</option>
+                      {tiposTecnico.map(tipo => (
+                        <option key={tipo.id} value={tipo.id}>
+                          {tipo.rol_tecnico}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Empresa *</label>
+                    <select
+                      name="empresa"
+                      value={formData.empresa}
+                      onChange={handleInputChange}
+                      required
+                    >
+                      <option value="">Seleccionar empresa</option>
+                      {empresas.map(empresa => (
+                        <option key={empresa.id} value={empresa.id}>
+                          {empresa.nombre_empresa}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Sucursal *</label>
+                    <select
+                      name="sucursal"
+                      value={formData.sucursal}
+                      onChange={handleInputChange}
+                      required
+                      disabled={!formData.empresa}
+                    >
+                      <option value="">
+                        {formData.empresa ? 'Seleccionar sucursal' : 'Primero selecciona una empresa'}
                       </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Sucursal *</label>
-                  <select
-                    name="sucursal"
-                    value={formData.sucursal}
-                    onChange={handleInputChange}
-                    required
-                    disabled={!formData.empresa}
-                  >
-                    <option value="">Seleccionar sucursal</option>
-                    {sucursales.map(sucursal => (
-                      <option key={sucursal.id} value={sucursal.id}>
-                        {sucursal.nombre_sucursal}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Especialidad</label>
-                  <select
-                    name="especialidad"
-                    value={formData.especialidad}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Seleccionar especialidad</option>
-                    <option value="Energía Solar">Energía Solar</option>
-                    <option value="Eficiencia Energética">Eficiencia Energética</option>
-                    <option value="Biomasa">Biomasa</option>
-                    <option value="Eólica">Eólica</option>
-                    <option value="Geotermia">Geotermia</option>
-                    <option value="Hidráulica">Hidráulica</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Tipo de Técnico *</label>
-                  <select
-                    name="tipo_tecnico"
-                    value={formData.tipo_tecnico}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Seleccionar tipo</option>
-                    <option value="1">Técnico Superior</option>
-                  </select>
+                      {sucursales.map(sucursal => (
+                        <option key={sucursal.id} value={sucursal.id}>
+                          {sucursal.nombre_sucursal}
+                        </option>
+                      ))}
+                    </select>
+                    {!formData.empresa && (
+                      <div className="help-text">
+                        <span className="help-icon">ℹ️</span>
+                        Selecciona una empresa para ver las sucursales disponibles
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -414,9 +488,11 @@ const TecnicosPage = () => {
                   className="btn-secondary"
                   onClick={handleCloseModal}
                 >
+                  <span>❌</span>
                   Cancelar
                 </button>
                 <button type="submit" className="btn-primary">
+                  <span>{editingTecnico ? '💾' : '✅'}</span>
                   {editingTecnico ? 'Actualizar' : 'Crear'} Técnico
                 </button>
               </div>

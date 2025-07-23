@@ -2,7 +2,14 @@ import { lazy, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { TecnicoAuthProvider } from './contexts/TecnicoAuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute.jsx';
+import TecnicoProtectedRoute from './components/TecnicoProtectedRoute.jsx';
+import TecnicoLogin from './components/TecnicoLogin.jsx';
+import TecnicoLayout from './components/TecnicoLayout.jsx';
+import TecnicoDashboardContent from './pages/TecnicoDashboardContent.jsx';
+import TecnicoOrdenes from './pages/TecnicoOrdenes.jsx';
+import TecnicoMantenimientos from './pages/TecnicoMantenimientos.jsx';
 import './index.css';
 import LandingPage from './pages/landing/LandingPage.jsx';
 // Importen las páginas dentro de estas líneas
@@ -39,6 +46,23 @@ const router = createBrowserRouter([
       // Inicio de Sesión
       {path: '/login', element: <Login />},
       {path: '/cerrar-sesion', element: <CerrarSesion />},
+      // Rutas de técnicos
+      {path: '/tecnico/login', element: <TecnicoLogin />},
+      {
+        path: '/tecnico',
+        element: <TecnicoProtectedRoute><TecnicoLayout /></TecnicoProtectedRoute>,
+        children: [
+          {path: 'dashboard', element: <TecnicoDashboardContent />},
+          {path: 'ordenes', element: <TecnicoOrdenes />},
+          {path: 'mantenimientos', element: <TecnicoMantenimientos />},
+          {path: 'equipos', element: <div style={{padding: '24px'}}><h1>🔧 Equipos</h1><p>Página de equipos en desarrollo...</p></div>},
+          {path: 'reportes', element: <div style={{padding: '24px'}}><h1>📊 Reportes</h1><p>Página de reportes en desarrollo...</p></div>},
+          {path: 'consumo', element: <div style={{padding: '24px'}}><h1>⚡ Consumo Energético</h1><p>Página de consumo en desarrollo...</p></div>},
+          {path: 'tickets', element: <div style={{padding: '24px'}}><h1>🎫 Tickets de Soporte</h1><p>Página de tickets en desarrollo...</p></div>},
+          {path: 'inventario', element: <div style={{padding: '24px'}}><h1>📦 Inventario</h1><p>Página de inventario en desarrollo...</p></div>},
+          {path: 'calendario', element: <div style={{padding: '24px'}}><h1>📅 Calendario</h1><p>Página de calendario en desarrollo...</p></div>}
+        ]
+      },
       //Rutas del dashboard
       {path: '/dashboard', element: <ProtectedRoute><Dashboard /></ProtectedRoute>},
       {path: '/dashboard/empresas', element: <ProtectedRoute><EmpresasPage /></ProtectedRoute>},
@@ -66,7 +90,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
-      <RouterProvider router={router} />
+      <TecnicoAuthProvider>
+        <RouterProvider router={router} />
+      </TecnicoAuthProvider>
     </AuthProvider>
   </StrictMode>,
 )
